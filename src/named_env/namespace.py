@@ -45,6 +45,7 @@ class EnvironmentNamespace:
         env_var_object: variables.BaseVariableMixin = vars_map[name]
         env: t.MutableMapping = super().__getattribute__("_env")
         if name in env:
+            # Place casted value to the cache
             resolved_vars_map[name] = env_var_object.cast(env[name])
         elif isinstance(env_var_object, variables.OptionalVariableMixin):
             # Cast defaults also
@@ -54,10 +55,11 @@ class EnvironmentNamespace:
         return resolved_vars_map[name]
 
     def __setattr__(self, key, value) -> None:
-        # Non-`BaseVariableMixin` attributes
         vars_map: VarsMapType = super().__getattribute__("_vars")
+        # Non-`BaseVariableMixin` attributes
         if key not in vars_map:
             return super().__setattr__(key, value)
+        # Place casted value to the cache
         env_var_object: variables.BaseVariableMixin = vars_map[key]
         resolved_vars_map: CacheMapType = super().__getattribute__("_resolved")
         resolved_vars_map[key] = env_var_object.cast(value)

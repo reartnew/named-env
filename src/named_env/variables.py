@@ -22,7 +22,7 @@ class BaseVariableMixin:
 
     @classmethod
     def _get_base_class(cls) -> type:
-        # Find first non-BaseVariableMixin superclass
+        """Find first non-BaseVariableMixin superclass"""
         for klass in cls.mro():
             if not issubclass(klass, BaseVariableMixin):
                 return klass
@@ -56,9 +56,6 @@ class Boolean(BaseVariableMixin):
 
     _POSITIVE_VALUES: t.Set[str] = {"y", "yes", "true", "1"}
     _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0", "none"}
-
-    def __init__(self, value: t.Union[str, bool, None] = None) -> None:
-        self._value = value
 
     @classmethod
     def cast(cls, value) -> bool:
