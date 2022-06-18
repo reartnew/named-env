@@ -33,7 +33,7 @@ class EnvironmentNamespace:
         # `_resolved` property is an optional dictionary cache of all extracted variables
         super().__setattr__("_resolved", {})
         class_object = super().__getattribute__("__class__")
-        # `_vars` property maps class `_Variable` attributes names to instances
+        # `_vars` property maps class `BaseVariableMixin` attributes names to instances
         _vars: t.Dict[str, variables.BaseVariableMixin] = {}
         for k in dir(class_object):
             prop_value = getattr(class_object, k, None)
@@ -42,7 +42,7 @@ class EnvironmentNamespace:
         super().__setattr__("_vars", _vars)
 
     def __getattribute__(self, name: str) -> t.Any:
-        # Default logic for non-`Variable` attributes
+        # Default logic for non-`BaseVariableMixin` attributes
         attr = super().__getattribute__(name)
         vars_map: t.Dict[str, variables.BaseVariableMixin] = super().__getattribute__("_vars")
         if name not in vars_map:
@@ -63,8 +63,10 @@ class EnvironmentNamespace:
         return cache[name]
 
     def __setattr__(self, key, value) -> None:
-        # Non-`Variable` attributes
-        if key not in super().__getattribute__("_vars"):
+        # Non-`BaseVariableMixin` attributes
+        vars_map: t.Dict[str, variables.BaseVariableMixin] = super().__getattribute__("_vars")
+        if key not in vars_map:
             return super().__setattr__(key, value)
-        super().__getattribute__("_resolved")[key] = value
+        var_item: variables.BaseVariableMixin = vars_map[key]
+        super().__getattribute__("_resolved")[key] = var_item.cast(value)
         return None

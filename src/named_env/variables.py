@@ -22,11 +22,11 @@ class BaseVariableMixin:
 
     @classmethod
     def _get_base_class(cls) -> type:
-        # Find first non-BaseVariable superclass
+        # Find first non-BaseVariableMixin superclass
         for klass in cls.mro():
             if not issubclass(klass, BaseVariableMixin):
                 return klass
-        raise TypeError(f"Non-BaseVariable superclass not found for {cls}")
+        raise TypeError(f"Non-BaseVariableMixin superclass not found for {cls}")
 
     def __new__(cls, *args, **kwargs) -> t.Any:
         return cls._get_base_class().__new__(cls, *args, **kwargs)  # noqa
