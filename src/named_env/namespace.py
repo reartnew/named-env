@@ -7,7 +7,7 @@ import typing as t
 from . import variables
 
 __all__ = [
-    "Environment",
+    "EnvironmentNamespace",
     "MissingVariableError",
 ]
 
@@ -24,12 +24,12 @@ class MissingVariableError(EnvironmentError):
         self.description = description
 
 
-class Environment:
+class EnvironmentNamespace:
     """Lazy environment evaluation on first attribute get/set.
     Overrides __getattribute__ method, thus one should be much attentive while overriding methods."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, env: t.Optional[t.MutableMapping] = None) -> None:
+        super().__setattr__("_env", env or os.environ)
         # `_resolved` property is an optional dictionary cache of all extracted variables
         super().__setattr__("_resolved", {})
         class_object = super().__getattribute__("__class__")
@@ -52,8 +52,9 @@ class Environment:
         if name in cache:
             return cache[name]
         env_var_object: variables.BaseVariableMixin = vars_map[name]
-        if name in os.environ:
-            cache[name] = env_var_object.cast(os.environ[name])
+        env: t.MutableMapping = super().__getattribute__("_env")
+        if name in env:
+            cache[name] = env_var_object.cast(env[name])
         elif isinstance(env_var_object, variables.OptionalVariableMixin):
             # Cast defaults also
             cache[name] = env_var_object.cast(env_var_object.default)

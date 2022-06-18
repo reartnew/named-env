@@ -90,17 +90,17 @@ class RequiredBoolean(Boolean, RequiredVariableMixin):
     """Boolean-like required variable class"""
 
 
-class OptionalString(str, OptionalVariableMixin):
+class OptionalString(OptionalVariableMixin, str):
     """String-like optional variable class"""
 
 
-class OptionalFloat(float, OptionalVariableMixin):
+class OptionalFloat(OptionalVariableMixin, float):
     """Float-like optional variable class"""
 
 
-class OptionalInteger(int, OptionalVariableMixin):
+class OptionalInteger(OptionalVariableMixin, int):
     """Integer-like optional variable class"""
 
 
-class OptionalBoolean(Boolean, OptionalVariableMixin):
+class OptionalBoolean(OptionalVariableMixin, Boolean):
     """Boolean-like optional variable class"""

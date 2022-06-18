@@ -1,7 +1,7 @@
 """Class-based environment variables typed specification"""
 
-from .environment import (
-    Environment,
+from .namespace import (
+    EnvironmentNamespace,
     MissingVariableError,
 )
 from .variables import (
