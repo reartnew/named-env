@@ -22,6 +22,9 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     GOOD_INTEGER = RequiredInteger()
     GOOD_FLOAT = RequiredFloat()
     GOOD_BOOLEAN = RequiredBoolean()
+    BAD_INTEGER = RequiredInteger()
+    BAD_FLOAT = RequiredFloat()
+    BAD_BOOLEAN = RequiredBoolean()
 
 
 constants = PytestEnvironmentNamespace(
@@ -31,6 +34,9 @@ constants = PytestEnvironmentNamespace(
         GOOD_INTEGER="1",
         GOOD_FLOAT="10.",
         GOOD_BOOLEAN="Y",
+        BAD_INTEGER="Foo",
+        BAD_FLOAT="Bar",
+        BAD_BOOLEAN="Baz",
     )
 )
 
@@ -59,19 +65,37 @@ def test_undefined_optional_string():
     assert constants.OPTIONAL_UNDEFINED_STRING == "OPTIONAL_UNDEFINED_STRING default value"
 
 
-def test_int():
+def test_good_int():
     """Check integer cast"""
     assert isinstance(constants.GOOD_INTEGER, int)
     assert constants.GOOD_INTEGER == 1
 
 
-def test_float():
+def test_good_float():
     """Check float cast"""
     assert isinstance(constants.GOOD_FLOAT, float)
     assert constants.GOOD_FLOAT == 10.0
 
 
-def test_bool():
+def test_good_bool():
     """Check boolean cast"""
     assert isinstance(constants.GOOD_BOOLEAN, bool)
     assert constants.GOOD_BOOLEAN
+
+
+def test_bad_int():
+    """Check integer cast failure"""
+    with pytest.raises(ValueError, match="invalid literal for int"):
+        assert constants.BAD_INTEGER
+
+
+def test_bad_float():
+    """Check float cast failure"""
+    with pytest.raises(ValueError, match="could not convert string to float"):
+        assert constants.BAD_FLOAT
+
+
+def test_bad_bool():
+    """Check boolean cast failure"""
+    with pytest.raises(ValueError, match="is not a valid bool-convertible value"):
+        assert constants.BAD_BOOLEAN is False

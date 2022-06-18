@@ -29,7 +29,7 @@ class BaseVariableMixin:
         raise TypeError(f"Non-BaseVariable superclass not found for {cls}")
 
     def __new__(cls, *args, **kwargs) -> t.Any:
-        return cls._get_base_class().__new__(cls, *args, **kwargs)
+        return cls._get_base_class().__new__(cls, *args, **kwargs)  # noqa
 
     @classmethod
     def cast(cls, value):
@@ -52,41 +52,40 @@ class OptionalVariableMixin(BaseVariableMixin):
 
 
 class Boolean(BaseVariableMixin):
-    """Bool-like class to interpret string values. Can't subclass ```bool``` directly."""
+    """Bool-like class to interpret string values"""
 
-    _POSITIVE: t.Set[str] = {"y", "yes", "true"}
-    _NEGATIVE: t.Set[str] = {"n", "no", "false"}
+    _POSITIVE_VALUES: t.Set[str] = {"y", "yes", "true", "1"}
+    _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0"}
 
     def __init__(self, value: t.Union[str, bool, None] = None) -> None:
-        normalized_value: t.Optional[str] = str(value).lower() if value is not None else None
-        assert normalized_value in self._POSITIVE | self._NEGATIVE | {
-            None
-        }, f"{repr(value)} is not a valid bool-convertible value"
-        self._value = normalized_value
+        self._value = value
 
     def __bool__(self) -> bool:
         assert self._value is not None, "Expected late init"
-        return self._value in self._POSITIVE
+        return self._value in self._POSITIVE_VALUES
 
     @classmethod
     def cast(cls, value) -> bool:
         """Override default cast to produce pure booleans"""
+        normalized_value: t.Optional[str] = str(value).lower() if value is not None else None
+        if normalized_value not in cls._POSITIVE_VALUES | cls._NEGATIVE_VALUES | {None}:
+            raise ValueError(f"{repr(value)} is not a valid bool-convertible value")
         return bool(value)
 
 
-class RequiredString(str, RequiredVariableMixin):
+class RequiredString(RequiredVariableMixin, str):
     """String-like required variable class"""
 
 
-class RequiredFloat(float, RequiredVariableMixin):
+class RequiredFloat(RequiredVariableMixin, float):
     """Float-like required variable class"""
 
 
-class RequiredInteger(int, RequiredVariableMixin):
+class RequiredInteger(RequiredVariableMixin, int):
     """Integer-like required variable class"""
 
 
-class RequiredBoolean(Boolean, RequiredVariableMixin):
+class RequiredBoolean(RequiredVariableMixin, Boolean):
     """Boolean-like required variable class"""
 
 
