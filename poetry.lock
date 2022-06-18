@@ -361,6 +361,17 @@ pytest = ">=3.5.0"
 toml = "*"
 
 [[package]]
+name = "pytest-data-suites"
+version = "1.0.3"
+description = "Class-based pytest parametrization"
+category = "dev"
+optional = false
+python-versions = ">=3.8,<4.0"
+
+[package.dependencies]
+pytest = ">=6.0,<8.0"
+
+[[package]]
 name = "pytest-mypy"
 version = "0.9.1"
 description = "Mypy static type checker plugin for Pytest"
@@ -527,7 +538,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "67058c03f8ce9e5d522c70c7fe5a84f442762a0f98810991a6efdb7d22a7cefe"
+content-hash = "fde8fdde51b4c39e90fb3082f179b8decc32fcb114e669892b401e6f3c94b8e5"
 
 [metadata.files]
 astroid = [
@@ -725,6 +736,10 @@ pytest-bandit = [
 ]
 pytest-black = [
     {file = "pytest-black-0.3.12.tar.gz", hash = "sha256:1d339b004f764d6cd0f06e690f6dd748df3d62e6fe1a692d6a5500ac2c5b75a5"},
+]
+pytest-data-suites = [
+    {file = "pytest-data-suites-1.0.3.tar.gz", hash = "sha256:366d4255da65fb72cfcc814c02f4d9e10829300eeb0055e5e7cbe2ad7eecbf85"},
+    {file = "pytest_data_suites-1.0.3-py3-none-any.whl", hash = "sha256:e99a3b0a0f979086c6da0681fbd4851bf9b2b66218dfcfdf0ade7755331b8c34"},
 ]
 pytest-mypy = [
     {file = "pytest-mypy-0.9.1.tar.gz", hash = "sha256:9ffa3bf405c12c5c6be9e92e22bebb6ab2c91b9c32f45b0f0c93af473269ab5c"},

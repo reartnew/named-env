@@ -1,4 +1,6 @@
 """EnvironmentNamespace tests"""
+from typing import Optional
+
 import pytest
 
 from named_env import (
@@ -10,6 +12,7 @@ from named_env import (
     RequiredBoolean,
     MissingVariableError,
 )
+from .cases import OptionalStringToBooleanDataSuite
 
 
 class PytestEnvironmentNamespace(EnvironmentNamespace):
@@ -30,6 +33,7 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     REQUIRED_BUT_MISSING_INTEGER_TO_SET = RequiredInteger()
     REQUIRED_FLOAT_TO_SET = RequiredFloat()
     OPTIONAL_STRING_TO_SET = OptionalString("OPTIONAL_STRING_TO_SET value before set")
+    REQUIRED_BOOLEAN_TO_SET = RequiredBoolean()
 
 
 constants = PytestEnvironmentNamespace(
@@ -143,3 +147,11 @@ def test_float_bad_set():
     """Validate bad set operation"""
     with pytest.raises(ValueError, match="could not convert string to float"):
         constants.REQUIRED_FLOAT_TO_SET = "FooBar"
+
+
+# pylint: disable=invalid-name
+@OptionalStringToBooleanDataSuite.parametrize
+def test_valid_boolean_set(raw: Optional[str], result: bool):
+    """Validate boolean set operation inputs"""
+    constants.REQUIRED_BOOLEAN_TO_SET = raw  # type: ignore
+    assert constants.REQUIRED_BOOLEAN_TO_SET == result

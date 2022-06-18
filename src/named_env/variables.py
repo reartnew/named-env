@@ -63,7 +63,7 @@ class Boolean(BaseVariableMixin):
     @classmethod
     def cast(cls, value) -> bool:
         """Override default cast to produce pure booleans"""
-        normalized_value: t.Optional[str] = str(value).lower() if value is not None else None
+        normalized_value: t.Optional[str] = str(value).lower()
         if normalized_value not in cls._POSITIVE_VALUES | cls._NEGATIVE_VALUES:
             raise ValueError(f"{repr(value)} is not a valid bool-convertible value")
         return normalized_value in cls._POSITIVE_VALUES

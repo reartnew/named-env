@@ -24,6 +24,7 @@ pytest-mypy = "*"
 pytest-black = "*"
 pytest-bandit = "*"
 tox-poetry = "*"
+pytest-data-suites = "*"
 
 [tool.pytest.ini_options]
 testpaths = [
