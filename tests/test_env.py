@@ -38,7 +38,7 @@ constants = PytestEnvironmentNamespace(
         OPTIONAL_DEFINED_STRING="OPTIONAL_DEFINED_STRING defined value",
         GOOD_INTEGER="1",
         GOOD_FLOAT="10.",
-        GOOD_BOOLEAN="Y",
+        GOOD_BOOLEAN="N",
         BAD_INTEGER="Foo",
         BAD_FLOAT="Bar",
         BAD_BOOLEAN="Baz",
@@ -87,7 +87,7 @@ def test_good_float():
 def test_good_bool():
     """Check boolean cast"""
     assert isinstance(constants.GOOD_BOOLEAN, bool)
-    assert constants.GOOD_BOOLEAN
+    assert not constants.GOOD_BOOLEAN
 
 
 def test_bad_int():

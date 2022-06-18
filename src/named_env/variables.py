@@ -55,22 +55,18 @@ class Boolean(BaseVariableMixin):
     """Bool-like class to interpret string values"""
 
     _POSITIVE_VALUES: t.Set[str] = {"y", "yes", "true", "1"}
-    _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0"}
+    _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0", "none"}
 
     def __init__(self, value: t.Union[str, bool, None] = None) -> None:
         self._value = value
-
-    def __bool__(self) -> bool:
-        assert self._value is not None, "Expected late init"
-        return self._value in self._POSITIVE_VALUES
 
     @classmethod
     def cast(cls, value) -> bool:
         """Override default cast to produce pure booleans"""
         normalized_value: t.Optional[str] = str(value).lower() if value is not None else None
-        if normalized_value not in cls._POSITIVE_VALUES | cls._NEGATIVE_VALUES | {None}:
+        if normalized_value not in cls._POSITIVE_VALUES | cls._NEGATIVE_VALUES:
             raise ValueError(f"{repr(value)} is not a valid bool-convertible value")
-        return bool(value)
+        return normalized_value in cls._POSITIVE_VALUES
 
 
 class RequiredString(RequiredVariableMixin, str):
