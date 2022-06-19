@@ -2,6 +2,12 @@
 
 Class-based environment variables typed specification.
 
+## Installation
+
+```shell
+pip install named-env
+```
+
 ## Usage example
 
 ```python
