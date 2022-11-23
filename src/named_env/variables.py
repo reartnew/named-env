@@ -1,6 +1,10 @@
 """Variables definition"""
 
+import os
 import typing as t
+
+from .exceptions import MissingVariableError
+from .namespace import EnvironmentNamespace
 
 __all__ = [
     "BaseVariableMixin",
@@ -18,9 +22,29 @@ __all__ = [
     "OptionalList",
 ]
 
+sentinel = object()
+
 
 class BaseVariableMixin:
     """Common ancestor for all variables classes"""
+
+    def __set_name__(self, owner, name):
+        self._name = name
+
+    def __get__(self, owner, owner_type):
+        if self._value is sentinel:
+            env = owner.env if isinstance(owner, EnvironmentNamespace) else os.environ
+            if self._name in env:
+                self._value = self.cast(env[self._name])
+            elif isinstance(self, OptionalVariableMixin):
+                # Cast defaults also
+                self._value = self.cast(self.default)
+            elif isinstance(self, RequiredVariableMixin):
+                raise MissingVariableError(variable=self._name, description=self.description)
+        return self._value
+
+    def __set__(self, instance, value) -> None:
+        self._value = self.cast(value)
 
     @classmethod
     def _get_base_class(cls) -> type:
@@ -31,7 +55,10 @@ class BaseVariableMixin:
         raise TypeError(f"Non-BaseVariableMixin superclass not found for {cls}")
 
     def __new__(cls, *args, **kwargs) -> t.Any:
-        return cls._get_base_class().__new__(cls, *args, **kwargs)  # noqa
+        obj = cls._get_base_class().__new__(cls, *args, **kwargs)  # noqa
+        obj._name = None
+        obj._value = sentinel
+        return obj
 
     @classmethod
     def cast(cls, value):

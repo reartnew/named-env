@@ -43,7 +43,7 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
 
 
 constants = PytestEnvironmentNamespace(
-    env_source=dict(
+    environ=dict(
         REQUIRED_DEFINED_STRING="REQUIRED_DEFINED_STRING defined value",
         OPTIONAL_DEFINED_STRING="OPTIONAL_DEFINED_STRING defined value",
         GOOD_INTEGER="1",
