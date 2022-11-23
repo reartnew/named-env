@@ -1,5 +1,4 @@
 """EnvironmentNamespace tests"""
-from typing import Optional
 
 import pytest
 
@@ -14,11 +13,26 @@ from named_env import (
     OptionalList,
     MissingVariableError,
 )
-from .cases import OptionalStringToBooleanDataSuite
+
+# Test environment dict
+environ = dict(
+    REQUIRED_DEFINED_STRING="REQUIRED_DEFINED_STRING defined value",
+    OPTIONAL_DEFINED_STRING="OPTIONAL_DEFINED_STRING defined value",
+    GOOD_INTEGER="1",
+    GOOD_FLOAT="10.",
+    GOOD_BOOLEAN="N",
+    BAD_INTEGER="Foo",
+    BAD_FLOAT="Bar",
+    BAD_BOOLEAN="Baz",
+    REQUIRED_STRING_TO_SET="REQUIRED_STRING_TO_SET value before set",
+    REQUIRED_INTEGER_TO_SET="Not even an integer",
+    REQUIRED_DEFINED_LIST="REQUIRED_DEFINED_LIST defined value",
+    OPTIONAL_DEFINED_LIST="OPTIONAL_DEFINED_LIST defined value",
+)
 
 
 class PytestEnvironmentNamespace(EnvironmentNamespace):
-    """Test environment"""
+    """Test environment namespace"""
 
     REQUIRED_DEFINED_STRING = RequiredString()
     REQUIRED_UNDEFINED_STRING = RequiredString()
@@ -42,148 +56,144 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     OPTIONAL_UNDEFINED_LIST = OptionalList(["OPTIONAL_UNDEFINED_LIST default value"])
 
 
-constants = PytestEnvironmentNamespace(
-    environ=dict(
-        REQUIRED_DEFINED_STRING="REQUIRED_DEFINED_STRING defined value",
-        OPTIONAL_DEFINED_STRING="OPTIONAL_DEFINED_STRING defined value",
-        GOOD_INTEGER="1",
-        GOOD_FLOAT="10.",
-        GOOD_BOOLEAN="N",
-        BAD_INTEGER="Foo",
-        BAD_FLOAT="Bar",
-        BAD_BOOLEAN="Baz",
-        REQUIRED_STRING_TO_SET="REQUIRED_STRING_TO_SET value before set",
-        REQUIRED_INTEGER_TO_SET="Not even an integer",
-        REQUIRED_DEFINED_LIST="REQUIRED_DEFINED_LIST defined value",
-        OPTIONAL_DEFINED_LIST="OPTIONAL_DEFINED_LIST defined value",
-    )
-)
+def parametrized_constants_source(func):
+    """Check both type-based and instance-based definitions"""
+
+    class ConstantsClass(PytestEnvironmentNamespace):
+        """Used for class-based (not instance-based) access tests"""
+
+        environ = environ
+
+    return pytest.mark.parametrize("constants", [PytestEnvironmentNamespace(environ=environ), ConstantsClass])(func)
 
 
-def test_defined_required_string():
+@parametrized_constants_source
+def test_defined_required_string(constants):
     """Check required defined string variable"""
     assert isinstance(constants.REQUIRED_DEFINED_STRING, str)
     assert constants.REQUIRED_DEFINED_STRING == "REQUIRED_DEFINED_STRING defined value"
 
 
-def test_defined_optional_string():
+@parametrized_constants_source
+def test_defined_optional_string(constants):
     """Check optional defined string variable"""
     assert isinstance(constants.OPTIONAL_DEFINED_STRING, str)
     assert constants.OPTIONAL_DEFINED_STRING == "OPTIONAL_DEFINED_STRING defined value"
 
 
-def test_undefined_required_string():
+@parametrized_constants_source
+def test_undefined_required_string(constants):
     """Check required undefined string variable"""
     with pytest.raises(MissingVariableError):
         assert constants.REQUIRED_UNDEFINED_STRING
 
 
-def test_undefined_optional_string():
+@parametrized_constants_source
+def test_undefined_optional_string(constants):
     """Check optional undefined string variable"""
     assert isinstance(constants.OPTIONAL_UNDEFINED_STRING, str)
     assert constants.OPTIONAL_UNDEFINED_STRING == "OPTIONAL_UNDEFINED_STRING default value"
 
 
-def test_good_int():
+@parametrized_constants_source
+def test_good_int(constants):
     """Check integer cast"""
     assert isinstance(constants.GOOD_INTEGER, int)
     assert constants.GOOD_INTEGER == 1
 
 
-def test_good_float():
+@parametrized_constants_source
+def test_good_float(constants):
     """Check float cast"""
     assert isinstance(constants.GOOD_FLOAT, float)
     assert constants.GOOD_FLOAT == 10.0
 
 
-def test_good_bool():
+@parametrized_constants_source
+def test_good_bool(constants):
     """Check boolean cast"""
     assert isinstance(constants.GOOD_BOOLEAN, bool)
     assert not constants.GOOD_BOOLEAN
 
 
-def test_bad_int():
+@parametrized_constants_source
+def test_bad_int(constants):
     """Check integer cast failure"""
     with pytest.raises(ValueError, match="invalid literal for int"):
         assert constants.BAD_INTEGER
 
 
-def test_bad_float():
+@parametrized_constants_source
+def test_bad_float(constants):
     """Check float cast failure"""
     with pytest.raises(ValueError, match="could not convert string to float"):
         assert constants.BAD_FLOAT
 
 
-def test_bad_bool():
+@parametrized_constants_source
+def test_bad_bool(constants):
     """Check boolean cast failure"""
     with pytest.raises(ValueError, match="is not a valid bool-convertible value"):
         assert constants.BAD_BOOLEAN is False
 
 
+@parametrized_constants_source
 # pylint: disable=invalid-name
-def test_required_string_set():
+def test_required_string_set(constants):
     """Check set operation on required strings"""
     assert constants.REQUIRED_STRING_TO_SET == "REQUIRED_STRING_TO_SET value before set"
     constants.REQUIRED_STRING_TO_SET = "REQUIRED_STRING_TO_SET value after set"
     assert constants.REQUIRED_STRING_TO_SET == "REQUIRED_STRING_TO_SET value after set"
 
 
+@parametrized_constants_source
 # pylint: disable=invalid-name
-def test_optional_string_set():
+def test_optional_string_set(constants):
     """Check set operation on optional strings"""
     assert constants.OPTIONAL_STRING_TO_SET == "OPTIONAL_STRING_TO_SET value before set"
     constants.OPTIONAL_STRING_TO_SET = "OPTIONAL_STRING_TO_SET value after set"
     assert constants.OPTIONAL_STRING_TO_SET == "OPTIONAL_STRING_TO_SET value after set"
 
 
+@parametrized_constants_source
 # pylint: disable=invalid-name
-def test_bad_integer_good_set():
-    """Validate good set operation over bad values"""
+def test_bad_integer_set(constants):
+    """Validate set operation over bad values"""
     constants.REQUIRED_INTEGER_TO_SET = 2
     assert constants.REQUIRED_INTEGER_TO_SET == 2
 
 
+@parametrized_constants_source
 # pylint: disable=invalid-name
-def test_missing_integer_good_set():
-    """Validate good set operation over missing values"""
+def test_missing_integer_set(constants):
+    """Validate set operation over missing values"""
     constants.REQUIRED_BUT_MISSING_INTEGER_TO_SET = 3
     assert constants.REQUIRED_BUT_MISSING_INTEGER_TO_SET == 3
 
 
-# pylint: disable=invalid-name
-def test_float_bad_set():
-    """Validate bad set operation"""
-    with pytest.raises(ValueError, match="could not convert string to float"):
-        constants.REQUIRED_FLOAT_TO_SET = "FooBar"
-
-
-# pylint: disable=invalid-name
-@OptionalStringToBooleanDataSuite.parametrize
-def test_valid_boolean_set(raw: Optional[str], result: bool):
-    """Validate boolean set operation inputs"""
-    constants.REQUIRED_BOOLEAN_TO_SET = raw  # type: ignore
-    assert constants.REQUIRED_BOOLEAN_TO_SET == result
-
-
-def test_defined_required_list():
+@parametrized_constants_source
+def test_defined_required_list(constants):
     """Check required defined list variable"""
     assert isinstance(constants.REQUIRED_DEFINED_LIST, list)
     assert constants.REQUIRED_DEFINED_LIST == ["REQUIRED_DEFINED_LIST defined value"]
 
 
-def test_defined_optional_list():
+@parametrized_constants_source
+def test_defined_optional_list(constants):
     """Check optional defined list variable"""
     assert isinstance(constants.OPTIONAL_DEFINED_LIST, list)
     assert constants.OPTIONAL_DEFINED_LIST == ["OPTIONAL_DEFINED_LIST defined value"]
 
 
-def test_undefined_required_list():
+@parametrized_constants_source
+def test_undefined_required_list(constants):
     """Check required undefined list variable"""
     with pytest.raises(MissingVariableError):
         assert constants.REQUIRED_UNDEFINED_LIST
 
 
-def test_undefined_optional_list():
+@parametrized_constants_source
+def test_undefined_optional_list(constants):
     """Check optional undefined list variable"""
     assert isinstance(constants.OPTIONAL_UNDEFINED_LIST, list)
     assert constants.OPTIONAL_UNDEFINED_LIST == ["OPTIONAL_UNDEFINED_LIST default value"]

@@ -11,5 +11,8 @@ __all__ = [
 class EnvironmentNamespace:
     """Optional namespace to provide common environment dictionary replacement"""
 
+    environ: t.MutableMapping[str, str] = os.environ
+
     def __init__(self, *, environ: t.Optional[t.MutableMapping[str, str]] = None) -> None:
-        self.env: t.MutableMapping[str, str] = environ if environ is not None else os.environ
+        if environ is not None:
+            self.environ = environ

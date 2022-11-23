@@ -31,9 +31,15 @@ class BaseVariableMixin:
     def __set_name__(self, owner, name):
         self._name = name
 
-    def __get__(self, owner, owner_type):
+    def __get__(self, obj, objtype=None):
         if self._value is sentinel:
-            env = owner.env if isinstance(owner, EnvironmentNamespace) else os.environ
+            env = (
+                obj.environ
+                if isinstance(obj, EnvironmentNamespace)
+                else objtype.environ
+                if issubclass(objtype, EnvironmentNamespace)
+                else os.environ
+            )
             if self._name in env:
                 self._value = self.cast(env[self._name])
             elif isinstance(self, OptionalVariableMixin):
@@ -42,9 +48,6 @@ class BaseVariableMixin:
             elif isinstance(self, RequiredVariableMixin):
                 raise MissingVariableError(variable=self._name, description=self.description)
         return self._value
-
-    def __set__(self, instance, value) -> None:
-        self._value = self.cast(value)
 
     @classmethod
     def _get_base_class(cls) -> type:
