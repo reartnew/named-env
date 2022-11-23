@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "named-env"
-version = "1.0.0"
+version = "1.0.1"
 description = "Class-based environment variables typed specification"
 license = "MIT"
 authors = [

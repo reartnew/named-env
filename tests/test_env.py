@@ -10,6 +10,8 @@ from named_env import (
     RequiredInteger,
     RequiredFloat,
     RequiredBoolean,
+    RequiredList,
+    OptionalList,
     MissingVariableError,
 )
 from .cases import OptionalStringToBooleanDataSuite
@@ -34,6 +36,10 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     REQUIRED_FLOAT_TO_SET = RequiredFloat()
     OPTIONAL_STRING_TO_SET = OptionalString("OPTIONAL_STRING_TO_SET value before set")
     REQUIRED_BOOLEAN_TO_SET = RequiredBoolean()
+    REQUIRED_DEFINED_LIST = RequiredList()
+    REQUIRED_UNDEFINED_LIST = RequiredList()
+    OPTIONAL_DEFINED_LIST = OptionalList(["OPTIONAL_DEFINED_LIST default value"])
+    OPTIONAL_UNDEFINED_LIST = OptionalList(["OPTIONAL_UNDEFINED_LIST default value"])
 
 
 constants = PytestEnvironmentNamespace(
@@ -48,6 +54,8 @@ constants = PytestEnvironmentNamespace(
         BAD_BOOLEAN="Baz",
         REQUIRED_STRING_TO_SET="REQUIRED_STRING_TO_SET value before set",
         REQUIRED_INTEGER_TO_SET="Not even an integer",
+        REQUIRED_DEFINED_LIST="REQUIRED_DEFINED_LIST defined value",
+        OPTIONAL_DEFINED_LIST="OPTIONAL_DEFINED_LIST defined value",
     )
 )
 
@@ -155,3 +163,27 @@ def test_valid_boolean_set(raw: Optional[str], result: bool):
     """Validate boolean set operation inputs"""
     constants.REQUIRED_BOOLEAN_TO_SET = raw  # type: ignore
     assert constants.REQUIRED_BOOLEAN_TO_SET == result
+
+
+def test_defined_required_list():
+    """Check required defined list variable"""
+    assert isinstance(constants.REQUIRED_DEFINED_LIST, list)
+    assert constants.REQUIRED_DEFINED_LIST == ["REQUIRED_DEFINED_LIST defined value"]
+
+
+def test_defined_optional_list():
+    """Check optional defined list variable"""
+    assert isinstance(constants.OPTIONAL_DEFINED_LIST, list)
+    assert constants.OPTIONAL_DEFINED_LIST == ["OPTIONAL_DEFINED_LIST defined value"]
+
+
+def test_undefined_required_list():
+    """Check required undefined list variable"""
+    with pytest.raises(MissingVariableError):
+        assert constants.REQUIRED_UNDEFINED_LIST
+
+
+def test_undefined_optional_list():
+    """Check optional undefined list variable"""
+    assert isinstance(constants.OPTIONAL_UNDEFINED_LIST, list)
+    assert constants.OPTIONAL_UNDEFINED_LIST == ["OPTIONAL_UNDEFINED_LIST default value"]

@@ -14,6 +14,8 @@ __all__ = [
     "OptionalFloat",
     "OptionalInteger",
     "OptionalBoolean",
+    "RequiredList",
+    "OptionalList",
 ]
 
 
@@ -66,6 +68,14 @@ class Boolean(BaseVariableMixin):
         return normalized_value in cls._POSITIVE_VALUES
 
 
+class List(BaseVariableMixin, list):
+    """Comma-separated lists reading"""
+
+    @classmethod
+    def cast(cls, value: t.Union[t.List[str], str]) -> t.List[str]:
+        return [item.strip() for item in value.split(",") if item] if isinstance(value, str) else value
+
+
 class RequiredString(RequiredVariableMixin, str):
     """String-like required variable class"""
 
@@ -96,3 +106,11 @@ class OptionalInteger(OptionalVariableMixin, int):
 
 class OptionalBoolean(OptionalVariableMixin, Boolean):
     """Boolean-like optional variable class"""
+
+
+class RequiredList(RequiredVariableMixin, List):
+    """List-like required variable class"""
+
+
+class OptionalList(OptionalVariableMixin, List):
+    """List-like optional variable class"""

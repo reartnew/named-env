@@ -11,5 +11,7 @@ from .variables import (
     OptionalInteger,
     OptionalFloat,
     OptionalBoolean,
+    RequiredList,
+    OptionalList,
 )
 from .version import __version__
