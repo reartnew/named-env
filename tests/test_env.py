@@ -32,13 +32,13 @@ environ = dict(
     REQUIRED_INTEGER_TO_SET="Not even an integer",
     REQUIRED_DEFINED_LIST="REQUIRED_DEFINED_LIST defined value",
     OPTIONAL_DEFINED_LIST="OPTIONAL_DEFINED_LIST defined value",
-    CHOICE_CORRECTLY_DEFINED_STRING="CHOICE_CORRECTLY_DEFINED_STRING correct value",
-    CHOICE_INCORRECTLY_DEFINED_STRING="CHOICE_INCORRECTLY_DEFINED_STRING incorrect value",
-    CHOICE_CORRECTLY_DEFINED_LIST=(
-        "CHOICE_CORRECTLY_DEFINED_LIST correct value,CHOICE_CORRECTLY_DEFINED_LIST correct value"
+    CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING="CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING correct value",
+    CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING="CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING incorrect value",
+    CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST=(
+        "CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value,CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value"
     ),
-    CHOICE_INCORRECTLY_DEFINED_LIST=(
-        "CHOICE_INCORRECTLY_DEFINED_LIST correct value,CHOICE_INCORRECTLY_DEFINED_LIST incorrect value"
+    CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST=(
+        "CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST correct value,CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST incorrect value"
     ),
 )
 
@@ -66,10 +66,18 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     REQUIRED_UNDEFINED_LIST = RequiredList()
     OPTIONAL_DEFINED_LIST = OptionalList(["OPTIONAL_DEFINED_LIST default value"])
     OPTIONAL_UNDEFINED_LIST = OptionalList(["OPTIONAL_UNDEFINED_LIST default value"])
-    CHOICE_CORRECTLY_DEFINED_STRING = RequiredString(choice=["CHOICE_CORRECTLY_DEFINED_STRING correct value"])
-    CHOICE_INCORRECTLY_DEFINED_STRING = RequiredString(choice=["CHOICE_INCORRECTLY_DEFINED_STRING correct value"])
-    CHOICE_CORRECTLY_DEFINED_LIST = RequiredList(choice=["CHOICE_CORRECTLY_DEFINED_LIST correct value"])
-    CHOICE_INCORRECTLY_DEFINED_LIST = RequiredList(choice=["CHOICE_INCORRECTLY_DEFINED_LIST correct value"])
+    CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING = RequiredString(
+        choice=["CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING correct value"]
+    )
+    CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING = RequiredString(
+        choice=["CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING correct value"]
+    )
+    CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST = RequiredList(
+        choice=["CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value"]
+    )
+    CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST = RequiredList(
+        choice=["CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST correct value"]
+    )
 
 
 def parametrized_constants_source(func):
@@ -225,24 +233,26 @@ def test_undefined_optional_list(constants: ConstantsType) -> None:
 @parametrized_constants_source
 def test_choice_string_correct(constants: ConstantsType) -> None:
     """Check choice-based correct string variable"""
-    assert isinstance(constants.CHOICE_CORRECTLY_DEFINED_STRING, str)
-    assert constants.CHOICE_CORRECTLY_DEFINED_STRING == "CHOICE_CORRECTLY_DEFINED_STRING correct value"
+    assert isinstance(constants.CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING, str)
+    assert (
+        constants.CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING == "CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING correct value"
+    )
 
 
 @parametrized_constants_source
 def test_choice_string_incorrect(constants: ConstantsType) -> None:
     """Check choice-based incorrect string variable"""
     with pytest.raises(ChoiceValueError, match="unexpected value"):
-        assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_STRING, str)
+        assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING, str)
 
 
 @parametrized_constants_source
 def test_choice_list_correct(constants: ConstantsType) -> None:
     """Check choice-based correct list variable"""
-    assert isinstance(constants.CHOICE_CORRECTLY_DEFINED_LIST, list)
-    assert constants.CHOICE_CORRECTLY_DEFINED_LIST == [
-        "CHOICE_CORRECTLY_DEFINED_LIST correct value",
-        "CHOICE_CORRECTLY_DEFINED_LIST correct value",
+    assert isinstance(constants.CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST, list)
+    assert constants.CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST == [
+        "CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value",
+        "CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value",
     ]
 
 
@@ -250,4 +260,4 @@ def test_choice_list_correct(constants: ConstantsType) -> None:
 def test_choice_list_incorrect(constants: ConstantsType) -> None:
     """Check choice-based incorrect list variable"""
     with pytest.raises(ChoiceValueError, match="unexpected value"):
-        assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_LIST, list)
+        assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST, list)
