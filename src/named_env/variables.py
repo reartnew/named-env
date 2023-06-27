@@ -28,6 +28,8 @@ sentinel = object()
 class BaseVariableMixin:
     """Common ancestor for all variables classes"""
 
+    _choice: t.Optional[t.Sequence] = None
+
     def __set_name__(self, owner, name):
         self._name = name
 
@@ -58,7 +60,9 @@ class BaseVariableMixin:
         raise TypeError(f"Non-BaseVariableMixin superclass not found for {cls}")
 
     def __new__(cls, *args, **kwargs) -> t.Any:
+        choice: t.Optional[t.Sequence] = kwargs.pop("choice", None)
         obj = cls._get_base_class().__new__(cls, *args, **kwargs)  # noqa
+        obj._choice = choice
         obj._name = None
         obj._value = sentinel
         return obj
@@ -72,14 +76,16 @@ class BaseVariableMixin:
 class RequiredVariableMixin(BaseVariableMixin):
     """Required variables with optional description to inform on failed obtaining"""
 
-    def __init__(self, *, description: t.Optional[str] = None) -> None:
+    # pylint: disable=unused-argument
+    def __init__(self, *, description: t.Optional[str] = None, choice: t.Optional[t.Sequence] = None) -> None:
         self.description = description
 
 
 class OptionalVariableMixin(BaseVariableMixin):
     """Optional variables with required default value"""
 
-    def __init__(self, default: t.Any) -> None:
+    # pylint: disable=unused-argument
+    def __init__(self, default: t.Any, choice: t.Optional[t.Sequence] = None) -> None:
         self.default = default
 
 
