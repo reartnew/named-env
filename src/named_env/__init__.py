@@ -1,6 +1,9 @@
 """Class-based environment variables typed specification"""
 
-from .exceptions import MissingVariableError
+from .exceptions import (
+    MissingVariableError,
+    ChoiceValueError,
+)
 from .namespace import EnvironmentNamespace
 from .variables import (
     RequiredString,

@@ -14,6 +14,7 @@ from named_env import (
     RequiredList,
     OptionalList,
     MissingVariableError,
+    ChoiceValueError,
 )
 
 # Test environment dict
@@ -223,5 +224,5 @@ def test_choice_correct(constants: ConstantsType) -> None:
 @parametrized_constants_source
 def test_choice_incorrect(constants: ConstantsType) -> None:
     """Check choice-based incorrect variable"""
-    with pytest.raises(ValueError, match="unexpected value"):
+    with pytest.raises(ChoiceValueError, match="unexpected value"):
         assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_STRING, str)

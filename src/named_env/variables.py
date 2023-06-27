@@ -3,7 +3,10 @@
 import os
 import typing as t
 
-from .exceptions import MissingVariableError
+from .exceptions import (
+    MissingVariableError,
+    ChoiceValueError,
+)
 from .namespace import EnvironmentNamespace
 
 __all__ = [
@@ -54,7 +57,7 @@ class BaseVariableMixin:
         """Cast-check-set"""
         cast_value: t.Any = self.cast(value)
         if self._choice is not None and cast_value not in self._choice:
-            raise ValueError(f"{self._name} variable has an unexpected value")
+            raise ChoiceValueError(f"{self._name} variable has an unexpected value")
         self._value = cast_value
 
     @classmethod
