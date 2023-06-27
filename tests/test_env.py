@@ -15,6 +15,7 @@ from named_env import (
 )
 
 # Test environment dict
+# pylint: disable=use-dict-literal
 environ = dict(
     REQUIRED_DEFINED_STRING="REQUIRED_DEFINED_STRING defined value",
     OPTIONAL_DEFINED_STRING="OPTIONAL_DEFINED_STRING defined value",
