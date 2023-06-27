@@ -56,9 +56,12 @@ class BaseVariableMixin:
     def _set_value(self, value: t.Any) -> None:
         """Cast-check-set"""
         cast_value: t.Any = self.cast(value)
+        self._validate_cast_value(cast_value)
+        self._value = cast_value
+
+    def _validate_cast_value(self, cast_value: t.Any) -> None:
         if self._choice is not None and cast_value not in self._choice:
             raise ChoiceValueError(f"{self._name} variable has an unexpected value")
-        self._value = cast_value
 
     @classmethod
     def _get_base_class(cls) -> type:
@@ -119,6 +122,10 @@ class List(BaseVariableMixin, list):
     @classmethod
     def cast(cls, value: t.Union[t.List[str], str]) -> t.List[str]:
         return [item.strip() for item in value.split(",") if item] if isinstance(value, str) else value
+
+    def _validate_cast_value(self, cast_value: t.Any) -> None:
+        for cast_value_item in cast_value:  # type: t.Any
+            super()._validate_cast_value(cast_value_item)
 
 
 class RequiredString(RequiredVariableMixin, str):
