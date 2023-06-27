@@ -38,7 +38,8 @@ environ = dict(
         "CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value,CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value"
     ),
     CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST=(
-        "CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST correct value,CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST incorrect value"
+        "CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST correct value,"
+        "CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST incorrect value"
     ),
 )
 
@@ -71,6 +72,14 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     )
     CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING = RequiredString(
         choice=["CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING correct value"]
+    )
+    CHOICE_CORRECTLY_DEFINED_OPTIONAL_STRING = OptionalString(
+        "CHOICE_CORRECTLY_DEFINED_OPTIONAL_STRING correct value",
+        choice=["CHOICE_CORRECTLY_DEFINED_OPTIONAL_STRING correct value"],
+    )
+    CHOICE_INCORRECTLY_DEFINED_OPTIONAL_STRING = OptionalString(
+        "CHOICE_INCORRECTLY_DEFINED_OPTIONAL_STRING incorrect value",
+        choice=["CHOICE_INCORRECTLY_DEFINED_OPTIONAL_STRING correct value"],
     )
     CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST = RequiredList(
         choice=["CHOICE_CORRECTLY_DEFINED_REQUIRED_LIST correct value"]
@@ -231,8 +240,8 @@ def test_undefined_optional_list(constants: ConstantsType) -> None:
 
 
 @parametrized_constants_source
-def test_choice_string_correct(constants: ConstantsType) -> None:
-    """Check choice-based correct string variable"""
+def test_choice_required_string_correct(constants: ConstantsType) -> None:
+    """Check choice-based correct required string variable"""
     assert isinstance(constants.CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING, str)
     assert (
         constants.CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING == "CHOICE_CORRECTLY_DEFINED_REQUIRED_STRING correct value"
@@ -240,10 +249,26 @@ def test_choice_string_correct(constants: ConstantsType) -> None:
 
 
 @parametrized_constants_source
-def test_choice_string_incorrect(constants: ConstantsType) -> None:
-    """Check choice-based incorrect string variable"""
+def test_choice_required_string_incorrect(constants: ConstantsType) -> None:
+    """Check choice-based incorrect required string variable"""
     with pytest.raises(ChoiceValueError, match="unexpected value"):
         assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_REQUIRED_STRING, str)
+
+
+@parametrized_constants_source
+def test_choice_optional_string_correct(constants: ConstantsType) -> None:
+    """Check choice-based correct optional string variable"""
+    assert isinstance(constants.CHOICE_CORRECTLY_DEFINED_OPTIONAL_STRING, str)
+    assert (
+        constants.CHOICE_CORRECTLY_DEFINED_OPTIONAL_STRING == "CHOICE_CORRECTLY_DEFINED_OPTIONAL_STRING correct value"
+    )
+
+
+@parametrized_constants_source
+def test_choice_optional_string_incorrect(constants: ConstantsType) -> None:
+    """Check choice-based incorrect optional string variable"""
+    with pytest.raises(ChoiceValueError, match="unexpected value"):
+        assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_OPTIONAL_STRING, str)
 
 
 @parametrized_constants_source
