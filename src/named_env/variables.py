@@ -43,13 +43,19 @@ class BaseVariableMixin:
                 else os.environ
             )
             if self._name in env:
-                self._value = self.cast(env[self._name])
+                self._set_value(env[self._name])
             elif isinstance(self, OptionalVariableMixin):
-                # Cast defaults also
-                self._value = self.cast(self.default)
+                self._set_value(self.default)
             elif isinstance(self, RequiredVariableMixin):
                 raise MissingVariableError(variable=self._name, description=self.description)
         return self._value
+
+    def _set_value(self, value: t.Any) -> None:
+        """Cast-check-set"""
+        cast_value: t.Any = self.cast(value)
+        if self._choice is not None and cast_value not in self._choice:
+            raise ValueError(f"{self._name} variable has an unexpected value")
+        self._value = cast_value
 
     @classmethod
     def _get_base_class(cls) -> type:
