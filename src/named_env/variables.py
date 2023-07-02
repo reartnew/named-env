@@ -108,12 +108,22 @@ class Boolean(BaseVariableMixin):
     _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0", "none"}
 
     @classmethod
-    def cast(cls, value) -> bool:
+    def cast(cls, value) -> t.Optional[bool]:
         """Override default cast to produce pure booleans"""
         normalized_value: t.Optional[str] = str(value).lower()
-        if normalized_value not in cls._POSITIVE_VALUES | cls._NEGATIVE_VALUES:
-            raise ValueError(f"{repr(value)} is not a valid bool-convertible value")
-        return normalized_value in cls._POSITIVE_VALUES
+        return (
+            False
+            if normalized_value in cls._NEGATIVE_VALUES
+            else True
+            if normalized_value in cls._POSITIVE_VALUES
+            else None
+        )
+
+    def __new__(cls, *args, **kwargs) -> t.Any:
+        if "choice" in kwargs:
+            raise TypeError(f"{cls.__name__}.__new__() got an unexpected keyword argument 'choice'")
+        kwargs["choice"] = {True, False}
+        return super().__new__(cls, *args, **kwargs)
 
 
 class List(BaseVariableMixin, list):

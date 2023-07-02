@@ -173,7 +173,7 @@ def test_bad_float(constants: ConstantsType) -> None:
 @parametrized_constants_source
 def test_bad_bool(constants: ConstantsType) -> None:
     """Check boolean cast failure"""
-    with pytest.raises(ValueError, match="is not a valid bool-convertible value"):
+    with pytest.raises(ChoiceValueError):
         assert constants.BAD_BOOLEAN is False
 
 
