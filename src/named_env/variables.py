@@ -33,18 +33,20 @@ class BaseVariableMixin:
 
     _choice: t.Optional[t.Sequence] = None
 
-    def __set_name__(self, owner, name):
-        self._name = name
+    def __set_name__(self, owner: type, name: str):
+        self._name: t.Optional[str] = name
+        self._namespace = owner if issubclass(owner, EnvironmentNamespace) else None
 
     def __get__(self, obj, objtype=None):
-        if self._value is sentinel:
-            env = (
-                obj.environ
-                if isinstance(obj, EnvironmentNamespace)
-                else objtype.environ
-                if issubclass(objtype, EnvironmentNamespace)
-                else os.environ
-            )
+        namespace: t.Union[t.Type[EnvironmentNamespace], EnvironmentNamespace, None] = (
+            obj
+            if isinstance(obj, EnvironmentNamespace)
+            else objtype
+            if issubclass(objtype, EnvironmentNamespace)
+            else None
+        )
+        if self._value is sentinel or namespace is not None and not namespace.cache_values:
+            env = (namespace or os).environ
             if self._name in env:
                 self._set_value(env[self._name])
             elif isinstance(self, OptionalVariableMixin):
@@ -78,6 +80,7 @@ class BaseVariableMixin:
         obj = cls._get_base_class().__new__(cls, *args, **kwargs)  # noqa
         obj._choice = choice
         obj._name = None
+        obj._namespace = None
         obj._value = sentinel
         return obj
 

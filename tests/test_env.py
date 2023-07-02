@@ -87,6 +87,7 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST = RequiredList(
         choice=["CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST correct value"]
     )
+    CACHE_TEST_STRING = RequiredString()
 
 
 def parametrized_constants_source(func):
@@ -285,3 +286,22 @@ def test_invalid_choice_value() -> None:
     """Check incorrect choice value"""
     with pytest.raises(ValueError, match="'choice' argument must be a sequence"):
         RequiredString(choice={})  # type: ignore
+
+
+@parametrized_constants_source
+def test_enabled_cache(constants: ConstantsType) -> None:
+    """Check enabled cache"""
+    constants.environ["CACHE_TEST_STRING"] = "Foo"
+    assert constants.CACHE_TEST_STRING == "Foo"
+    constants.environ["CACHE_TEST_STRING"] = "Bar"
+    assert constants.CACHE_TEST_STRING == "Foo"
+
+
+@parametrized_constants_source
+def test_disabled_cache(constants: ConstantsType) -> None:
+    """Check disabled cache"""
+    constants.cache_values = False
+    constants.environ["CACHE_TEST_STRING"] = "Foo"
+    assert constants.CACHE_TEST_STRING == "Foo"
+    constants.environ["CACHE_TEST_STRING"] = "Bar"
+    assert constants.CACHE_TEST_STRING == "Bar"
