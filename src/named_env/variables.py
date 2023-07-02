@@ -73,6 +73,8 @@ class BaseVariableMixin:
 
     def __new__(cls, *args, **kwargs) -> t.Any:
         choice: t.Optional[t.Sequence] = kwargs.pop("choice", None)
+        if choice is not None and not isinstance(choice, t.Sequence):
+            raise ValueError(f"'choice' argument must be a sequence (got {type(choice)!r})")
         obj = cls._get_base_class().__new__(cls, *args, **kwargs)  # noqa
         obj._choice = choice
         obj._name = None
@@ -122,7 +124,7 @@ class Boolean(BaseVariableMixin):
     def __new__(cls, *args, **kwargs) -> t.Any:
         if "choice" in kwargs:
             raise TypeError(f"{cls.__name__}.__new__() got an unexpected keyword argument 'choice'")
-        kwargs["choice"] = {True, False}
+        kwargs["choice"] = [True, False]
         return super().__new__(cls, *args, **kwargs)
 
 

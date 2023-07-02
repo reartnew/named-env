@@ -281,8 +281,7 @@ def test_choice_list_correct(constants: ConstantsType) -> None:
     ]
 
 
-@parametrized_constants_source
-def test_choice_list_incorrect(constants: ConstantsType) -> None:
-    """Check choice-based incorrect list variable"""
-    with pytest.raises(ChoiceValueError, match="unexpected value"):
-        assert isinstance(constants.CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST, list)
+def test_invalid_choice_value() -> None:
+    """Check incorrect choice value"""
+    with pytest.raises(ValueError, match="'choice' argument must be a sequence"):
+        RequiredString(choice={})  # type: ignore
