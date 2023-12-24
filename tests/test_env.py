@@ -104,9 +104,12 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     REQUIRED_TERNARY_FALSE = RequiredTernary()
     REQUIRED_TERNARY_NONE = RequiredTernary()
     REQUIRED_TERNARY_EMPTY = RequiredTernary()
-    OPTIONAL_TERNARY_TRUE = OptionalTernary(True)
-    OPTIONAL_TERNARY_FALSE = OptionalTernary(False)
-    OPTIONAL_TERNARY_NONE = OptionalTernary(None)
+    OPTIONAL_TERNARY_OBJECT_TRUE = OptionalTernary(True)
+    OPTIONAL_TERNARY_OBJECT_FALSE = OptionalTernary(False)
+    OPTIONAL_TERNARY_OBJECT_NONE = OptionalTernary(None)
+    OPTIONAL_TERNARY_STRING_TRUE = OptionalTernary("true")
+    OPTIONAL_TERNARY_STRING_FALSE = OptionalTernary("false")
+    OPTIONAL_TERNARY_STRING_NONE = OptionalTernary("none")
 
 
 def parametrized_constants_source(func):
@@ -351,6 +354,9 @@ def test_required_ternary(constants: ConstantsType) -> None:
 @parametrized_constants_source
 def test_optional_ternary(constants: ConstantsType) -> None:
     """Check optional ternary values"""
-    assert constants.OPTIONAL_TERNARY_TRUE is True
-    assert constants.OPTIONAL_TERNARY_FALSE is False
-    assert constants.OPTIONAL_TERNARY_NONE is None
+    assert constants.OPTIONAL_TERNARY_STRING_TRUE is True
+    assert constants.OPTIONAL_TERNARY_STRING_FALSE is False
+    assert constants.OPTIONAL_TERNARY_STRING_NONE is None
+    assert constants.OPTIONAL_TERNARY_OBJECT_TRUE is True
+    assert constants.OPTIONAL_TERNARY_OBJECT_FALSE is False
+    assert constants.OPTIONAL_TERNARY_OBJECT_NONE is None
