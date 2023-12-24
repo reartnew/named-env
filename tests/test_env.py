@@ -13,6 +13,7 @@ from named_env import (
     RequiredBoolean,
     RequiredList,
     OptionalList,
+    OptionalBoolean,
     MissingVariableError,
     ChoiceValueError,
 )
@@ -28,6 +29,7 @@ environ = dict(
     BAD_INTEGER="Foo",
     BAD_FLOAT="Bar",
     BAD_BOOLEAN="Baz",
+    OPTIONAL_DEFINED_BOOLEAN="Y",
     REQUIRED_STRING_TO_SET="REQUIRED_STRING_TO_SET value before set",
     REQUIRED_INTEGER_TO_SET="Not even an integer",
     REQUIRED_DEFINED_LIST="REQUIRED_DEFINED_LIST defined value",
@@ -57,6 +59,8 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     BAD_INTEGER = RequiredInteger()
     BAD_FLOAT = RequiredFloat()
     BAD_BOOLEAN = RequiredBoolean()
+    OPTIONAL_DEFINED_BOOLEAN = OptionalBoolean(False)
+    OPTIONAL_UNDEFINED_BOOLEAN = OptionalBoolean(True)
     REQUIRED_STRING_TO_SET = RequiredString()
     REQUIRED_INTEGER_TO_SET = RequiredInteger()
     REQUIRED_BUT_MISSING_INTEGER_TO_SET = RequiredInteger()
@@ -305,3 +309,10 @@ def test_disabled_cache(constants: ConstantsType) -> None:
     assert constants.CACHE_TEST_STRING == "Foo"
     constants.environ["CACHE_TEST_STRING"] = "Bar"
     assert constants.CACHE_TEST_STRING == "Bar"
+
+
+@parametrized_constants_source
+def test_optional_boolean(constants: ConstantsType) -> None:
+    """Check optional boolean"""
+    assert constants.OPTIONAL_DEFINED_BOOLEAN is True
+    assert constants.OPTIONAL_UNDEFINED_BOOLEAN is True

@@ -106,7 +106,15 @@ class OptionalVariableMixin(BaseVariableMixin):
         self.default = default
 
 
-class Boolean(BaseVariableMixin):
+class BoolBase:
+    """Consume any incoming constructor args silently"""
+
+    # pylint: disable=unused-argument
+    def __new__(cls, *args, **kwargs):
+        return super().__new__(cls)
+
+
+class Boolean(BaseVariableMixin, BoolBase):
     """Bool-like class to interpret string values"""
 
     _POSITIVE_VALUES: t.Set[str] = {"y", "yes", "true", "1"}
