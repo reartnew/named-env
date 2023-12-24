@@ -10,11 +10,13 @@ from .variables import (
     RequiredInteger,
     RequiredFloat,
     RequiredBoolean,
+    RequiredTernary,
+    RequiredList,
     OptionalString,
     OptionalInteger,
     OptionalFloat,
     OptionalBoolean,
-    RequiredList,
+    OptionalTernary,
     OptionalList,
 )
 from .version import __version__

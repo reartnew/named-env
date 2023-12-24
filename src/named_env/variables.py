@@ -17,11 +17,13 @@ __all__ = [
     "RequiredFloat",
     "RequiredInteger",
     "RequiredBoolean",
+    "RequiredTernary",
+    "RequiredList",
     "OptionalString",
     "OptionalFloat",
     "OptionalInteger",
     "OptionalBoolean",
-    "RequiredList",
+    "OptionalTernary",
     "OptionalList",
 ]
 
@@ -114,14 +116,16 @@ class BoolBase:
         return super().__new__(cls)
 
 
-class Boolean(BaseVariableMixin, BoolBase):
-    """Bool-like class to interpret string values"""
+class Ternary(BaseVariableMixin, BoolBase):
+    """True/False/None from a string"""
 
     _POSITIVE_VALUES: t.Set[str] = {"y", "yes", "true", "1"}
-    _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0", "none"}
+    _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0"}
+    _NONE_VALUES: t.Set[str] = {"none", ""}
+    _VALID_VALUES: t.List[t.Any] = [True, False, None]
 
     @classmethod
-    def cast(cls, value) -> t.Optional[bool]:
+    def cast(cls, value) -> t.Any:
         """Override default cast to produce pure booleans"""
         normalized_value: t.Optional[str] = str(value).lower()
         return (
@@ -130,13 +134,23 @@ class Boolean(BaseVariableMixin, BoolBase):
             else True
             if normalized_value in cls._POSITIVE_VALUES
             else None
+            if normalized_value in cls._NONE_VALUES
+            else sentinel
         )
 
     def __new__(cls, *args, **kwargs) -> t.Any:
         if "choice" in kwargs:
             raise TypeError(f"{cls.__name__}.__new__() got an unexpected keyword argument 'choice'")
-        kwargs["choice"] = [True, False]
+        kwargs["choice"] = cls._VALID_VALUES
         return super().__new__(cls, *args, **kwargs)
+
+
+class Boolean(Ternary):
+    """Bool-like class to interpret string values"""
+
+    _NEGATIVE_VALUES = Ternary._NEGATIVE_VALUES | Ternary._NONE_VALUES
+    _NONE_VALUES = set()
+    _VALID_VALUES = [True, False]
 
 
 class List(BaseVariableMixin, list):
@@ -167,6 +181,14 @@ class RequiredBoolean(RequiredVariableMixin, Boolean):
     """Boolean-like required variable class"""
 
 
+class RequiredTernary(RequiredVariableMixin, Ternary):
+    """Boolean-or-none required variable class"""
+
+
+class RequiredList(RequiredVariableMixin, List):
+    """List-like required variable class"""
+
+
 class OptionalString(OptionalVariableMixin, str):
     """String-like optional variable class"""
 
@@ -183,8 +205,8 @@ class OptionalBoolean(OptionalVariableMixin, Boolean):
     """Boolean-like optional variable class"""
 
 
-class RequiredList(RequiredVariableMixin, List):
-    """List-like required variable class"""
+class OptionalTernary(OptionalVariableMixin, Ternary):
+    """Boolean-or-none optional variable class"""
 
 
 class OptionalList(OptionalVariableMixin, List):

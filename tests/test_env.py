@@ -11,9 +11,11 @@ from named_env import (
     RequiredInteger,
     RequiredFloat,
     RequiredBoolean,
+    RequiredTernary,
     RequiredList,
     OptionalList,
     OptionalBoolean,
+    OptionalTernary,
     MissingVariableError,
     ChoiceValueError,
 )
@@ -30,6 +32,7 @@ environ = dict(
     BAD_FLOAT="Bar",
     BAD_BOOLEAN="Baz",
     OPTIONAL_DEFINED_BOOLEAN="Y",
+    EMPTY_DEFINED_BOOLEAN="",
     REQUIRED_STRING_TO_SET="REQUIRED_STRING_TO_SET value before set",
     REQUIRED_INTEGER_TO_SET="Not even an integer",
     REQUIRED_DEFINED_LIST="REQUIRED_DEFINED_LIST defined value",
@@ -43,6 +46,10 @@ environ = dict(
         "CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST correct value,"
         "CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST incorrect value"
     ),
+    REQUIRED_TERNARY_TRUE="Y",
+    REQUIRED_TERNARY_FALSE="N",
+    REQUIRED_TERNARY_NONE="None",
+    REQUIRED_TERNARY_EMPTY="",
 )
 
 
@@ -61,6 +68,7 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     BAD_BOOLEAN = RequiredBoolean()
     OPTIONAL_DEFINED_BOOLEAN = OptionalBoolean(False)
     OPTIONAL_UNDEFINED_BOOLEAN = OptionalBoolean(True)
+    EMPTY_DEFINED_BOOLEAN = RequiredBoolean()
     REQUIRED_STRING_TO_SET = RequiredString()
     REQUIRED_INTEGER_TO_SET = RequiredInteger()
     REQUIRED_BUT_MISSING_INTEGER_TO_SET = RequiredInteger()
@@ -92,6 +100,13 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
         choice=["CHOICE_INCORRECTLY_DEFINED_REQUIRED_LIST correct value"]
     )
     CACHE_TEST_STRING = RequiredString()
+    REQUIRED_TERNARY_TRUE = RequiredTernary()
+    REQUIRED_TERNARY_FALSE = RequiredTernary()
+    REQUIRED_TERNARY_NONE = RequiredTernary()
+    REQUIRED_TERNARY_EMPTY = RequiredTernary()
+    OPTIONAL_TERNARY_TRUE = OptionalTernary(True)
+    OPTIONAL_TERNARY_FALSE = OptionalTernary(False)
+    OPTIONAL_TERNARY_NONE = OptionalTernary(None)
 
 
 def parametrized_constants_source(func):
@@ -316,3 +331,26 @@ def test_optional_boolean(constants: ConstantsType) -> None:
     """Check optional boolean"""
     assert constants.OPTIONAL_DEFINED_BOOLEAN is True
     assert constants.OPTIONAL_UNDEFINED_BOOLEAN is True
+
+
+@parametrized_constants_source
+def test_empty_boolean(constants: ConstantsType) -> None:
+    """Check empty-string boolean"""
+    assert constants.EMPTY_DEFINED_BOOLEAN is False
+
+
+@parametrized_constants_source
+def test_required_ternary(constants: ConstantsType) -> None:
+    """Check required ternary values"""
+    assert constants.REQUIRED_TERNARY_TRUE is True
+    assert constants.REQUIRED_TERNARY_FALSE is False
+    assert constants.REQUIRED_TERNARY_NONE is None
+    assert constants.REQUIRED_TERNARY_EMPTY is None
+
+
+@parametrized_constants_source
+def test_optional_ternary(constants: ConstantsType) -> None:
+    """Check optional ternary values"""
+    assert constants.OPTIONAL_TERNARY_TRUE is True
+    assert constants.OPTIONAL_TERNARY_FALSE is False
+    assert constants.OPTIONAL_TERNARY_NONE is None
