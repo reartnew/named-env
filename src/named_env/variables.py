@@ -43,9 +43,7 @@ class BaseVariableMixin:
         namespace: t.Union[t.Type[EnvironmentNamespace], EnvironmentNamespace, None] = (
             obj
             if isinstance(obj, EnvironmentNamespace)
-            else objtype
-            if issubclass(objtype, EnvironmentNamespace)
-            else None
+            else objtype if issubclass(objtype, EnvironmentNamespace) else None
         )
         if self._value is sentinel or namespace is not None and not namespace.cache_values:
             env = (namespace or os).environ
@@ -131,11 +129,11 @@ class Ternary(BaseVariableMixin, BoolBase):
         return (
             False
             if normalized_value in cls._NEGATIVE_VALUES
-            else True
-            if normalized_value in cls._POSITIVE_VALUES
-            else None
-            if normalized_value in cls._NONE_VALUES
-            else sentinel
+            else (
+                True
+                if normalized_value in cls._POSITIVE_VALUES
+                else None if normalized_value in cls._NONE_VALUES else sentinel
+            )
         )
 
     def __new__(cls, *args, **kwargs) -> t.Any:
