@@ -1,5 +1,6 @@
 """EnvironmentNamespace tests"""
 
+import pathlib
 import typing as t
 
 import pytest
@@ -18,6 +19,10 @@ from named_env import (
     OptionalTernary,
     MissingVariableError,
     ChoiceValueError,
+    RequiredPath,
+    OptionalPath,
+    RequiredPathList,
+    OptionalPathList,
 )
 
 # Test environment dict
@@ -50,6 +55,10 @@ environ = dict(
     REQUIRED_TERNARY_FALSE="N",
     REQUIRED_TERNARY_NONE="None",
     REQUIRED_TERNARY_EMPTY="",
+    REQUIRED_DEFINED_PATH="/",
+    OPTIONAL_DEFINED_PATH=".",
+    REQUIRED_DEFINED_PATH_LIST="/foo:/bar",
+    OPTIONAL_DEFINED_PATH_LIST="/foo:/bar",
 )
 
 
@@ -110,6 +119,14 @@ class PytestEnvironmentNamespace(EnvironmentNamespace):
     OPTIONAL_TERNARY_STRING_TRUE = OptionalTernary("true")
     OPTIONAL_TERNARY_STRING_FALSE = OptionalTernary("false")
     OPTIONAL_TERNARY_STRING_NONE = OptionalTernary("none")
+    REQUIRED_DEFINED_PATH = RequiredPath()
+    REQUIRED_UNDEFINED_PATH = RequiredPath()
+    OPTIONAL_DEFINED_PATH = OptionalPath("/")
+    OPTIONAL_UNDEFINED_PATH = OptionalPath("/")
+    REQUIRED_DEFINED_PATH_LIST = RequiredPathList()
+    REQUIRED_UNDEFINED_PATH_LIST = RequiredPathList()
+    OPTIONAL_DEFINED_PATH_LIST = OptionalPathList("/baz:/qux")
+    OPTIONAL_UNDEFINED_PATH_LIST = OptionalPathList("/baz:/qux")
 
 
 def parametrized_constants_source(func):
@@ -127,7 +144,7 @@ def parametrized_constants_source(func):
     )(func)
 
 
-ConstantsType = t.Union[PytestEnvironmentNamespace, t.Type[PytestEnvironmentNamespace]]
+ConstantsType = t.Union[PytestEnvironmentNamespace, type[PytestEnvironmentNamespace]]
 
 
 @parametrized_constants_source
@@ -360,3 +377,54 @@ def test_optional_ternary(constants: ConstantsType) -> None:
     assert constants.OPTIONAL_TERNARY_OBJECT_TRUE is True
     assert constants.OPTIONAL_TERNARY_OBJECT_FALSE is False
     assert constants.OPTIONAL_TERNARY_OBJECT_NONE is None
+
+
+@parametrized_constants_source
+def test_required_path(constants: ConstantsType) -> None:
+    """Check required path"""
+    assert isinstance(constants.REQUIRED_DEFINED_PATH, pathlib.Path)
+
+
+@parametrized_constants_source
+def test_undefined_required_path(constants: ConstantsType) -> None:
+    """Check required undefined path"""
+    with pytest.raises(MissingVariableError):
+        assert constants.REQUIRED_UNDEFINED_PATH
+
+
+@parametrized_constants_source
+def test_optional_path(constants: ConstantsType) -> None:
+    """Check optional path"""
+    assert constants.OPTIONAL_DEFINED_PATH == pathlib.Path(".")
+
+
+@parametrized_constants_source
+def test_undefined_optional_path(constants: ConstantsType) -> None:
+    """Check optional undefined path"""
+    assert constants.OPTIONAL_UNDEFINED_PATH == pathlib.Path("/")
+
+
+@parametrized_constants_source
+def test_required_path_list(constants: ConstantsType) -> None:
+    """Check required path list"""
+    assert isinstance(constants.REQUIRED_DEFINED_PATH_LIST, list)
+    assert all(isinstance(item, pathlib.Path) for item in constants.REQUIRED_DEFINED_PATH_LIST)
+
+
+@parametrized_constants_source
+def test_undefined_required_path_list(constants: ConstantsType) -> None:
+    """Check required undefined path list"""
+    with pytest.raises(MissingVariableError):
+        assert constants.REQUIRED_UNDEFINED_PATH_LIST
+
+
+@parametrized_constants_source
+def test_optional_path_list(constants: ConstantsType) -> None:
+    """Check optional path list"""
+    assert constants.OPTIONAL_DEFINED_PATH_LIST == [pathlib.Path("/foo"), pathlib.Path("/bar")]
+
+
+@parametrized_constants_source
+def test_undefined_optional_path_list(constants: ConstantsType) -> None:
+    """Check optional undefined path list"""
+    assert constants.OPTIONAL_UNDEFINED_PATH_LIST == [pathlib.Path("/baz"), pathlib.Path("/qux")]
