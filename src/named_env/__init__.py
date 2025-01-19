@@ -12,11 +12,15 @@ from .variables import (
     RequiredBoolean,
     RequiredTernary,
     RequiredList,
+    RequiredPath,
+    RequiredPathList,
     OptionalString,
     OptionalInteger,
     OptionalFloat,
     OptionalBoolean,
     OptionalTernary,
     OptionalList,
+    OptionalPath,
+    OptionalPathList,
 )
 from .version import __version__
