@@ -1,6 +1,8 @@
+# pylint: disable=abstract-method
 """Variables definition"""
 
 import os
+import pathlib
 import typing as t
 
 from .exceptions import (
@@ -19,12 +21,16 @@ __all__ = [
     "RequiredBoolean",
     "RequiredTernary",
     "RequiredList",
+    "RequiredPath",
+    "RequiredPathList",
     "OptionalString",
     "OptionalFloat",
     "OptionalInteger",
     "OptionalBoolean",
     "OptionalTernary",
     "OptionalList",
+    "OptionalPath",
+    "OptionalPathList",
 ]
 
 sentinel = object()
@@ -40,10 +46,12 @@ class BaseVariableMixin:
         self._namespace = owner if issubclass(owner, EnvironmentNamespace) else None
 
     def __get__(self, obj, objtype=None):
-        namespace: t.Union[t.Type[EnvironmentNamespace], EnvironmentNamespace, None] = (
+        namespace: t.Union[type[EnvironmentNamespace], EnvironmentNamespace, None] = (
             obj
             if isinstance(obj, EnvironmentNamespace)
-            else objtype if issubclass(objtype, EnvironmentNamespace) else None
+            else objtype
+            if issubclass(objtype, EnvironmentNamespace)
+            else None
         )
         if self._value is sentinel or namespace is not None and not namespace.cache_values:
             env = (namespace or os).environ
@@ -117,10 +125,10 @@ class BoolBase:
 class Ternary(BaseVariableMixin, BoolBase):
     """True/False/None from a string"""
 
-    _POSITIVE_VALUES: t.Set[str] = {"y", "yes", "true", "1"}
-    _NEGATIVE_VALUES: t.Set[str] = {"n", "no", "false", "0"}
-    _NONE_VALUES: t.Set[str] = {"none", ""}
-    _VALID_VALUES: t.List[t.Any] = [True, False, None]
+    _POSITIVE_VALUES: set[str] = {"y", "yes", "true", "1"}
+    _NEGATIVE_VALUES: set[str] = {"n", "no", "false", "0"}
+    _NONE_VALUES: set[str] = {"none", ""}
+    _VALID_VALUES: list[t.Any] = [True, False, None]
 
     @classmethod
     def cast(cls, value) -> t.Any:
@@ -132,7 +140,9 @@ class Ternary(BaseVariableMixin, BoolBase):
             else (
                 True
                 if normalized_value in cls._POSITIVE_VALUES
-                else None if normalized_value in cls._NONE_VALUES else sentinel
+                else None
+                if normalized_value in cls._NONE_VALUES
+                else sentinel
             )
         )
 
@@ -155,8 +165,35 @@ class List(BaseVariableMixin, list):
     """Comma-separated lists reading"""
 
     @classmethod
-    def cast(cls, value: t.Union[t.List[str], str]) -> t.List[str]:
+    def cast(cls, value: t.Union[list[str], str]) -> list[str]:
         return [item.strip() for item in value.split(",") if item] if isinstance(value, str) else value
+
+    def _validate_cast_value(self, cast_value: t.Any) -> None:
+        for cast_value_item in cast_value:  # type: t.Any
+            super()._validate_cast_value(cast_value_item)
+
+
+BasePath = type(pathlib.Path())  # pathlib.WindowsPath if os.name == "nt" else pathlib.PosixPath
+
+
+class PathLike(BaseVariableMixin, BasePath):  # type: ignore[valid-type,misc]
+    """A string that is a cast to a path"""
+
+    @classmethod
+    def cast(cls, value: t.Union[str, pathlib.Path]) -> pathlib.Path:
+        return pathlib.Path(value)
+
+
+class PathList(BaseVariableMixin, list[pathlib.Path]):
+    """Colon-separated filesystem paths reading"""
+
+    @classmethod
+    def cast(cls, value: t.Union[list[t.Union[str, pathlib.Path]], str, pathlib.Path]) -> list[pathlib.Path]:
+        if isinstance(value, str):
+            return [pathlib.Path(item.strip()) for item in value.split(":") if item]
+        if isinstance(value, pathlib.Path):
+            return [value]
+        return [pathlib.Path(item) for item in value]
 
     def _validate_cast_value(self, cast_value: t.Any) -> None:
         for cast_value_item in cast_value:  # type: t.Any
@@ -175,6 +212,10 @@ class RequiredInteger(RequiredVariableMixin, int):
     """Integer-like required variable class"""
 
 
+class RequiredPath(RequiredVariableMixin, PathLike):
+    """Path-like required variable class"""
+
+
 class RequiredBoolean(RequiredVariableMixin, Boolean):
     """Boolean-like required variable class"""
 
@@ -185,6 +226,10 @@ class RequiredTernary(RequiredVariableMixin, Ternary):
 
 class RequiredList(RequiredVariableMixin, List):
     """List-like required variable class"""
+
+
+class RequiredPathList(RequiredVariableMixin, PathList):
+    """Path list required variable class"""
 
 
 class OptionalString(OptionalVariableMixin, str):
@@ -199,6 +244,10 @@ class OptionalInteger(OptionalVariableMixin, int):
     """Integer-like optional variable class"""
 
 
+class OptionalPath(OptionalVariableMixin, PathLike):
+    """Path-like optional variable class"""
+
+
 class OptionalBoolean(OptionalVariableMixin, Boolean):
     """Boolean-like optional variable class"""
 
@@ -209,3 +258,7 @@ class OptionalTernary(OptionalVariableMixin, Ternary):
 
 class OptionalList(OptionalVariableMixin, List):
     """List-like optional variable class"""
+
+
+class OptionalPathList(OptionalVariableMixin, PathList):
+    """Path list optional variable class"""
